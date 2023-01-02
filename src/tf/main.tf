@@ -16,7 +16,7 @@ resource "azurerm_managed_application_definition" "ama-def" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg-service-provider.name
   lock_level          = "ReadOnly"
-  package_file_uri    = "https://github.com/PrateekPrakash008/ama_test/blob/main/AMA.zip"
+  package_file_uri    = ".\AMA.zip"
   display_name        = "Testmanagedapplication471"
   description         = "ForTheHybridModel"
 
