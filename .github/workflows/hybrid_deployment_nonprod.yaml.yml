@@ -1,0 +1,27 @@
+name: "Hybrid_deployment_nonprod"
+run-name: "Hybrid_deployment_nonprod-${{ github.event.inputs.subscription_id }}"
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_id:
+        description: "Azure Subscription ID"
+        required: true
+
+jobs:
+  assesment:
+    name: "Hybrid_model"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./src/pshell/"
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Hybrid_deployment
+        shell: pwsh
+        run: |
+          Install-Module Az.Accounts -Force
+          ./1_login.ps1 -CLIENT_ID 10c6dfe3-2255-4cac-8139-3978fc21f8ef -CLIENT_SECRET .~m8Q~d1kLfdwPh6G1NG7vftThYAV53LaWHbmdgm -TENANT_ID 8b266952-26e7-437d-9f33-06603ce13f26 -SUBSCRIPTION_ID ${{ github.event.inputs.subscription_id }}
+          
+
+          
