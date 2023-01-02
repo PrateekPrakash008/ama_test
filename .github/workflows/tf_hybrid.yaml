@@ -1,0 +1,112 @@
+
+name: "Hybrid_deployment_nonprod"
+run-name: "Hybrid_deployment_nonprod-${{ github.event.inputs.subscription_id }}"
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_id:
+        description: "Azure Subscription ID"
+        required: true
+
+
+jobs:
+  onboarding:
+    name: "Hybrid_deployment_nonprod"
+    env:
+      ARM_CLIENT_ID: 10c6dfe3-2255-4cac-8139-3978fc21f8ef
+      ARM_CLIENT_SECRET: .~m8Q~d1kLfdwPh6G1NG7vftThYAV53LaWHbmdgm
+      ARM_SUBSCRIPTION_ID: ${{ github.event.inputs.subscription_id }}
+      ARM_TENANT_ID: 8b266952-26e7-437d-9f33-06603ce13f26
+
+      tf_actions_working_dir: "./src/tf/"
+      TF_VAR_subscriptionId: ${{ github.event.inputs.subscription_id }}
+
+      #TF_VAR_central_log_archive_name: "savcsmdiaglogging"
+      #TF_VAR_central_log_archive_rg_name: "rg-weu-sm-logging-archiving"
+      #TF_VAR_CLIENT_ID: ${{ secrets.AZURE_CLIENTID_NONPROD }}
+      #TF_VAR_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET_NONPROD }}
+      #TF_VAR_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      #TF_VAR_mgmt_subid: "802310bb-d53d-4624-a7d0-99dfca2a613a"
+      #TF_VAR_central_log_subid: "e321d3b8-e347-4e1a-8b7e-43406431126f"
+
+      TF_VAR_sub_id: ${{github.event.inputs.sub_id}}
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.tf_actions_working_dir }}
+    steps:
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.10
+          terraform_wrapper: false
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: terraform fmt
+        id: fmt
+        run: terraform fmt
+        working-directory: ${{ env.tf_actions_working_dir }}
+        continue-on-error: true
+
+      - name: terraform init
+        id: init
+        run: terraform init -backend-config=key="${{env.TF_VAR_sub_id}}.tfstate"
+        working-directory: ${{ env.tf_actions_working_dir }}
+        continue-on-error: false
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -out="${{env.TF_VAR_sub_id}}.plan"
+        working-directory: ${{ env.tf_actions_working_dir }}
+        continue-on-error: false
+
+     # - name: terraform apply
+     #   id: apply
+     #   run: terraform apply "${{env.TF_VAR_sub_id}}.plan"
+     #   working-directory: ${{ env.tf_actions_working_dir }}
+     #   continue-on-error: false
+       
+
+      # - name: output
+      #   id: output
+      #   run: |
+      #     echo TF_VAR_sub_id=$(terraform output -raw sub_id) >> $GITHUB_ENV
+      #   working-directory: ./terraform/onboarding
+
+      # - name: terraform init
+      #   id: init-deployments
+      #   working-directory: ./terraform/deployments
+      #   run: terraform init -backend-config=key="${{env.TF_VAR_sub_id}}.tfstate"
+
+      # - name: terraform plan
+      #   id: plan-deployments
+      #   run: terraform plan -out="${{env.TF_VAR_sub_id}}.plan"
+      #   working-directory: ./terraform/deployments
+      #   continue-on-error: false
+
+      # - name: terraform apply
+      #   id: apply-deployments
+      #   run: terraform apply "${{env.TF_VAR_sub_id}}.plan"
+      #   working-directory: ./terraform/deployments
+      #   continue-on-error: false
+
+      # - name: notification-success
+      #   shell: bash
+      #   if: (success() == 'true' && github.event.inputs.notification == 'true')
+      #   run: |
+      #     JSON_teams="{\"title\": \"Dear, ${{env.requestor_display_name}}, we have a message to you :), your subscription is ready! \", \"themeColor\": \"#00ff00\", \"text\": \"**Subscription Name:** ${{ env.TF_VAR_app_id }}-${{ env.TF_VAR_archtype }}-${{ env.TF_VAR_env }}-${{ env.TF_VAR_sufix }} <br/> **Email you provided:** [${{ env.requestor_email }}](mailto:${{ env.requestor_email }}) <br/> **Your new SPN:** spn-${{ env.TF_VAR_app_id }}-${{ env.TF_VAR_env }} <br/> **Next Steps:** [Documentation](https://intranet.volvocars.net/sites/CloudFoundationEnablement/SitePages/VolvoCars-Azure-Cloud-Platform-Overview.aspx)\" }"
+      #     curl -H "Content-Type: application/json" -d "${JSON_teams}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
+      #     JSON_email="{\"Status\": \"Success\", \"requestor_display_name\": \"${{env.requestor_display_name}} \", \"requestor_email\": \"${{ env.requestor_email }}\", \"app_id\": \"${{ env.TF_VAR_app_id }}\", \"archtype\": \"${{ env.TF_VAR_archtype }}\", \"env\": \"${{ env.TF_VAR_env }}\", \"sufix\": \"${{ env.TF_VAR_sufix }}\" }"
+      #     curl "https://prod-100.westeurope.logic.azure.com:443/workflows/3ba755bb82744b6da4b5dcc1e9dd5e70/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=${{ secrets.SIG }}" -X POST -H "Content-Type: application/json" -d "${JSON_email}"
+
+      # - name: notification-Failed
+      #   shell: bash
+      #   if: (failure() == 'true' && github.event.inputs.notification == 'true')
+      #   run: |
+      #     JSON_teams="{\"title\": \" ${{env.requestor_display_name}}, requested subscription and that failed :( \", \"themeColor\": \"#cc0000\", \"text\": \"Subscription: ${{ env.TF_VAR_app_id }}-${{ env.TF_VAR_archtype }}-${{ env.TF_VAR_env }}-${{ env.TF_VAR_sufix }} failed! <br/> **Email provided:** [${{ env.requestor_email }}](mailto:${{ env.requestor_email }}) \" }"
+      #     curl -H "Content-Type: application/json" -d "${JSON_teams}" "${{ secrets.FAILED_TEAMS_WEBHOOK }}"
+      #     JSON_email="{\"Status\": \"Failure\", \"requestor_display_name\": \"${{env.requestor_display_name}} \", \"requestor_email\": \"${{ env.requestor_email }}\", \"app_id\": \"${{ env.TF_VAR_app_id }}\", \"archtype\": \"${{ env.TF_VAR_archtype }}\", \"env\": \"${{ env.TF_VAR_env }}\", \"sufix\": \"${{ env.TF_VAR_sufix }}\" }"
+      #     curl "https://prod-100.westeurope.logic.azure.com:443/workflows/3ba755bb82744b6da4b5dcc1e9dd5e70/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=${{ secrets.SIG }}" -X POST -H "Content-Type: application/json" -d "${JSON_email}"
