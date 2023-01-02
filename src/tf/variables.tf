@@ -3,6 +3,11 @@ variable "proj_code" {
   default     = "hybrid"
 }
 
+variable "sub_id"{
+  description = "Subscription Id" 
+}
+
+
 variable "location" {
   default = "Central India"
 }
