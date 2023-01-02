@@ -63,11 +63,11 @@ jobs:
         working-directory: ${{ env.tf_actions_working_dir }}
         continue-on-error: false
 
-     # - name: terraform apply
-     #   id: apply
-     #   run: terraform apply "${{env.TF_VAR_sub_id}}.plan"
-     #   working-directory: ${{ env.tf_actions_working_dir }}
-     #   continue-on-error: false
+      - name: terraform apply
+        id: apply
+        run: terraform apply "${{env.TF_VAR_sub_id}}.plan"
+        working-directory: ${{ env.tf_actions_working_dir }}
+        continue-on-error: false
        
 
       # - name: output
