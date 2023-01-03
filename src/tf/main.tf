@@ -16,7 +16,7 @@ resource "azurerm_managed_application_definition" "ama-def" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg-service-provider.name
   lock_level          = "ReadOnly"
-  package_file_uri    = "https://github.com/Azure/azure-managedapp-samples/blob/master/Managed%20Application%20Sample%20Packages/101-minimal-template/minimal-template.zip"
+  package_file_uri    = "https://github.com/PrateekPrakash008/ama_test/blob/main/managedstorage%20(1).zip"
   display_name        = "Testmanagedapplication471"
   description         = "ForTheHybridModel"
 
