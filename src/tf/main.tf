@@ -41,7 +41,7 @@ resource "azurerm_managed_application" "ama01" {
 
   parameters = {
     location                 = var.location
-    storageAccountNamePrefix = "01"
+    storageAccountNamePrefix = "456897124"
     storageAccountType       = "Standard_LRS"
   }
 }
