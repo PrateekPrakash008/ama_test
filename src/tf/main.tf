@@ -1,23 +1,23 @@
 #--Service Provider AMA Definition--
 data "azurerm_role_definition" "builtin" {
-  name = "Contributor"
+  name = "Owner"
 }
 data "azurerm_client_config" "current" {}
 
 
 resource "azurerm_resource_group" "rg-service-provider" {
-  name     = "rg-${var.proj_code}-definition-471"
+  name     = "rg-${var.proj_code}-definition-456897124"
   location = var.location
 }
 
 
 resource "azurerm_managed_application_definition" "ama-def" {
-  name                = "managedapplication471"
+  name                = "managedapplication456897124"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg-service-provider.name
   lock_level          = "ReadOnly"
   package_file_uri    = "https://github.com/PrateekPrakash008/ama_test/blob/main/AMA.zip"
-  display_name        = "Testmanagedapplication471"
+  display_name        = "Testmanagedapplication456897124"
   description         = "ForTheHybridModel"
 
   authorization {
@@ -32,11 +32,11 @@ resource "azurerm_managed_application_definition" "ama-def" {
 }
 #--Service Provider AMA--
 resource "azurerm_managed_application" "ama01" {
-  name                        = "${var.proj_code}-ama-service-provider-471"
+  name                        = "${var.proj_code}-ama-service-provider-456897124"
   location                    = var.location
   resource_group_name         = azurerm_resource_group.rg-service-provider.name
   kind                        = "ServiceCatalog"
-  managed_resource_group_name = "rg-${var.proj_code}-ama-customer-471"
+  managed_resource_group_name = "rg-${var.proj_code}-ama-customer-456897124"
   application_definition_id   = azurerm_managed_application_definition.ama-def.id
 
   parameters = {
